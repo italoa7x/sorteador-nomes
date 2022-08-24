@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
+import { act } from "react-dom/test-utils";
 import { RecoilRoot } from "recoil";
 import { Sorteio } from "../paginas/Sorteio";
 import { useListaDeParticipantes } from "../state/hooks/useListaDeParticipantes";
@@ -65,5 +66,35 @@ describe("pagina da sorteio", () => {
     const amigoSecreto = screen.queryByRole("alert");
 
     expect(amigoSecreto?.textContent).toBeUndefined();
+  });
+
+  test("testa se o nome do amigo sorteado some depois de uns tempos", () => {
+    jest.useFakeTimers();
+
+    render(
+      <RecoilRoot>
+        <Sorteio />
+      </RecoilRoot>
+    );
+
+    const select = screen.getByPlaceholderText("Selecione o seu nome");
+
+    fireEvent.change(select, {
+      targert: {
+        value: participantes[1],
+      },
+    });
+
+    const botao = screen.getByRole("button");
+
+    fireEvent.click(botao);
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    const alerta = screen.queryByRole("alert");
+
+    expect(alerta).not.toBeInTheDocument();
   });
 });
